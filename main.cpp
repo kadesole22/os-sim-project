@@ -1,32 +1,33 @@
-#include "MemoryManager.h"
+#include "FileSystem.h"
+#include "DeviceManager.h"
 #include <iostream>
-#include <cstdlib>
 
 int main() {
-    // Create the page table
-    init_page_table();
+    // Create a root directory for testing
+    Directory root;
+
+    // Create a file named "hello.txt" in the directory
+    root.createFile("hello.txt");
+
+    // Adds the string "Hello, World!" to the hello.txt file
+    root.writeFile("hello.txt", "Hello, World!");
+
+    // Couts the content of the hello.txt file
+    std::cout << "Read from hello.txt: " << root.readFile("hello.txt") << "\n";
+
+    //Lists all files in the root directory
+    root.listFiles();
 
 
-    // Fill the disk with testing data to simulate a real test
-    for (int i = 0; i < NUM_PAGES; ++i)         // Iterate through the pages
-        for (int j = 0; j < PAGE_SIZE; ++j)     // Itearte through each byte in the page
-            disk[i][j] = 'A' + (i % 26);        // Assign random alphabet characters to act as "data" 
+    // Creates a device manager object to test the device manager system for I/O
+    DeviceManager devMgr;
 
-    // Setting the algorithm for page replacement to LRU
-    std::string algorithm = "LRU";
+    // Tests with 2 simulated devices
+    devMgr.sendToDevice("Printer", "Print this text.");
+    devMgr.sendToDevice("Disk", "Save this block.");
 
-    // Simulates 100 memory access
-    for (int i = 0; i < 100; ++i) {
-        // Randomly generaetes virtual address to access
-        int virtual_address = rand() % (PAGE_SIZE * NUM_PAGES);
-
-        // Access mem at the given virtual address using the LRU algorithm for faults
-        char value = access_memory(virtual_address, algorithm);
-
-        // Output the result of the mem access
-        std::cout << "Accessed virtual address " << virtual_address
-            << ", value: " << value << "\n";
-    }
+    // Handles interrupts in the queue such as the printer or disk interupts
+    devMgr.handleInterrupts();
 
     return 0;
 }
